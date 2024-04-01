@@ -1,0 +1,13 @@
+DROP TABLE IF EXISTS contracts;
+
+DROP TABLE IF EXISTS rooms;
+
+DROP TABLE IF EXISTS floors;
+
+DROP TABLE IF EXISTS buildings;
+
+DROP TABLE IF EXISTS clients;
+
+DROP TABLE IF EXISTS users;
+
+DROP TABLE IF EXISTS active_users;
