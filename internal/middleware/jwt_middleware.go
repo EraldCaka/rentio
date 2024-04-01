@@ -2,13 +2,14 @@ package middleware
 
 import (
 	"github.com/EraldCaka/rentio/internal/services"
+	"github.com/EraldCaka/rentio/util"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 )
 
 func AuthMiddleware(secretKey string) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		for _, route := range Routes {
+		for _, route := range util.Routes {
 			if c.Path() == route {
 				return c.Next()
 			}

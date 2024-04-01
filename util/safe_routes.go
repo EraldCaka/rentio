@@ -1,4 +1,4 @@
-package middleware
+package util
 
 // Routes these routes will be skipped by the middleware
 var Routes = []string{
