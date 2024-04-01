@@ -5,6 +5,7 @@ import (
 	"github.com/EraldCaka/rentio/internal/types"
 	"github.com/EraldCaka/rentio/util"
 	"github.com/gofiber/fiber/v2"
+	"net/http"
 	"time"
 )
 
@@ -90,12 +91,12 @@ func (h *UserHandler) DeleteUser(ctx *fiber.Ctx) error {
 }
 
 func (h *UserHandler) LoginUser(ctx *fiber.Ctx) error {
+	if exist := ctx.Get("Authorization"); exist != "" {
+		return ctx.JSON(types.NewError(http.StatusBadRequest, "an account has already logged in on this browser"))
+	}
 	var user *types.UserRequest
 	if err := ctx.BodyParser(&user); err != nil {
 		return types.ErrBadRequest()
-	}
-	if err := h.userService.Login(ctx.Context(), user); err != nil {
-		return ctx.JSON(err)
 	}
 	tokenData := types.JWTToken{
 		Username: user.Username,
@@ -103,8 +104,23 @@ func (h *UserHandler) LoginUser(ctx *fiber.Ctx) error {
 	}
 	token, err := services.CreateJWTToken(tokenData, util.Secret, time.Hour)
 	if err != nil {
-		return err
+		return ctx.JSON(err)
+	}
+	if err := h.userService.Login(ctx.Context(), user, token); err != nil {
+		return ctx.JSON(err)
 	}
 	ctx.Set("Authorization", token)
 	return ctx.JSON(fiber.Map{"token": token})
+}
+
+func (h *UserHandler) LogoutUser(ctx *fiber.Ctx) error {
+	token := ctx.Get("Authorization")
+	if token == "" {
+		return ctx.JSON(types.NewError(http.StatusForbidden, "you are not logged in"))
+	}
+	if err := h.userService.Logout(ctx.Context(), token); err != nil {
+		return ctx.JSON(err)
+	}
+	return nil
+
 }

@@ -9,6 +9,7 @@ const (
 const (
 	AdminRole = 0
 	UserRole  = 1
+	Customer  = 2
 )
 
 type User struct {

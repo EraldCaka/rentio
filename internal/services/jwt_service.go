@@ -25,5 +25,9 @@ func CreateJWTToken(tokenData types.JWTToken, secretKey string, expirationTime t
 		"exp":      time.Now().Add(expirationTime).Unix(),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	/*
+		TODO: IMPLEMENT A LOGIC TO STORE THE JWT TOKEN INSIDE THE DATABASE
+	*/
 	return token.SignedString([]byte(secretKey))
 }

@@ -14,7 +14,6 @@ func AuthMiddleware(secretKey string) fiber.Handler {
 				return c.Next()
 			}
 		}
-
 		tokenString := c.Get("Authorization")
 		if tokenString == "" {
 			return fiber.ErrUnauthorized

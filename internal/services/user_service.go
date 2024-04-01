@@ -43,8 +43,12 @@ func (s *UserStore) Delete(ctx context.Context, userID string) error {
 	return s.db.DeleteUser(ctx, userID)
 }
 
-func (s *UserStore) Login(ctx context.Context, userReq *types.UserRequest) error {
-	return s.db.Login(ctx, userReq)
+func (s *UserStore) Login(ctx context.Context, userReq *types.UserRequest, token string) error {
+	return s.db.Login(ctx, userReq, token)
+}
+
+func (s *UserStore) Logout(ctx context.Context, token string) error {
+	return s.db.Logout(ctx, token)
 }
 
 func (s *UserStore) GetActiveUserContract(ctx context.Context, userID string) (*types.Contract, error) {

@@ -20,7 +20,8 @@ type UserService interface {
 	GetByID(ctx context.Context, userID string) (*types.User, error)
 	Update(ctx context.Context, userID string, userReq *types.UserRequest) error
 	Delete(ctx context.Context, userID string) error
-	Login(ctx context.Context, userReq *types.UserRequest) error
+	Login(ctx context.Context, userReq *types.UserRequest, token string) error
+	Logout(ctx context.Context, token string) error
 	GetActiveUserContract(ctx context.Context, userID string) (*types.Contract, error)
 	GetAllUserContract(ctx context.Context, userID string) (*[]types.Contract, error)
 }

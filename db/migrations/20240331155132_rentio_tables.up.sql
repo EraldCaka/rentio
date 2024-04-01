@@ -50,5 +50,7 @@ CREATE TABLE IF NOT EXISTS contracts (
 CREATE TABLE IF NOT EXISTS active_users (
                                             id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
                                             role INT,
-                                            jwt_token VARCHAR
+                                            jwt_token VARCHAR,
+                                            username VARCHAR unique,
+                                            expire_time TIMESTAMP
 );

@@ -8,6 +8,7 @@ import (
 	"github.com/EraldCaka/rentio/internal/types"
 	"github.com/EraldCaka/rentio/util"
 	"log"
+	"time"
 )
 
 func (pg *Postgres) GetAllUserContract(ctx context.Context, userID string) (*[]types.Contract, error) {
@@ -77,6 +78,22 @@ func (pg *Postgres) GetUserByID(ctx context.Context, userID string) (*types.User
 	return &user, nil
 }
 
+func (pg *Postgres) GetUserByName(ctx context.Context, username string) (*types.User, error) {
+	query := "SELECT * FROM public.users WHERE username = $1"
+	row := pg.db.QueryRow(ctx, query, username)
+
+	var user types.User
+	err := row.Scan(&user.ID, &user.Username, &user.Password, &user.Role)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, fmt.Errorf("user with ID %s not found", username)
+		}
+		log.Printf("Error scanning user data: %v\n", err)
+		return nil, err
+	}
+	return &user, nil
+}
+
 func (pg *Postgres) GetUsers(ctx context.Context) ([]*types.User, error) {
 	var users []*types.User
 
@@ -128,8 +145,8 @@ func (pg *Postgres) DeleteUser(ctx context.Context, userID string) error {
 	return nil
 }
 
-func (pg *Postgres) Login(ctx context.Context, u *types.UserRequest) error {
-	query := "SELECT * FROM public.users WHERE username = $1"
+func (pg *Postgres) Login(ctx context.Context, u *types.UserRequest, token string) error {
+	query := "SELECT id, username, password, role FROM public.users WHERE username = $1"
 	row := pg.db.QueryRow(ctx, query, u.Username)
 	var user types.User
 	err := row.Scan(&user.ID, &user.Username, &user.Password, &user.Role)
@@ -140,11 +157,30 @@ func (pg *Postgres) Login(ctx context.Context, u *types.UserRequest) error {
 		log.Printf("Error scanning user data: %v\n", err)
 		return err
 	}
+
 	if user.ID == "" {
-		return fmt.Errorf("wrong credentials for user %s", u.Username)
+		return fmt.Errorf("user with username %s not found", u.Username)
 	}
+
 	if err := util.CheckPassword(u.Password, user.Password); err != nil {
 		return fmt.Errorf("invalid password for user %s", u.Username)
+	}
+
+	activeUserQuery := "INSERT INTO public.active_users (role, jwt_token, username, expire_time) VALUES ($1, $2, $3, $4)"
+	expirationTime := time.Now().Add(time.Hour)
+	if _, err := pg.db.Exec(ctx, activeUserQuery, user.Role, token, user.Username, expirationTime); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (pg *Postgres) Logout(ctx context.Context, token string) error {
+	query := "DELETE FROM public.active_users WHERE jwt_token=$1"
+	_, err := pg.db.Exec(ctx, query, token)
+	if err != nil {
+		log.Printf("Unable to delete user: %v\n", err)
+		return err
 	}
 	return nil
 }

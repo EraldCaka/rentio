@@ -9,6 +9,7 @@ type User interface {
 	UpdateUser(ctx *fiber.Ctx) error
 	DeleteUser(ctx *fiber.Ctx) error
 	LoginUser(ctx *fiber.Ctx) error
+	LogoutUser(ctx *fiber.Ctx) error
 	ActiveUserContract(ctx *fiber.Ctx) error
 	AllUserContract(ctx *fiber.Ctx) error
 }
